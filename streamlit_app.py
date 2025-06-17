@@ -22,6 +22,9 @@ if uploaded_file and user_id:
     # Reconstruct the user row
     record = {"user_id": user_id}
     for table, df in sheets.items():
+        df.columns = df.columns.str.strip()  # strip column names
+        if df.empty or "Primary_Key" not in df.columns:
+            continue
         h = hash_id(user_id, table)
         match = df[df['Primary_Key'] == h]
         if not match.empty:
