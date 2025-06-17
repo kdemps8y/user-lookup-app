@@ -6,10 +6,7 @@ from io import BytesIO
 
 st.title("User Lookup from Hashed Export")
 
-# Upload the hashed export Excel file
 uploaded_file = st.file_uploader("Upload users_hashed_export.xlsx", type="xlsx")
-
-# Input for user ID
 user_id = st.text_input("Enter User ID (e.g., u001):")
 
 def hash_id(user_id, table_name):
@@ -24,7 +21,6 @@ if uploaded_file and user_id:
 
     record = {"user_id": user_id}
 
-    # Assemble full_name
     def get_value(table):
         df = sheets.get(table)
         if df is not None and not df.empty and "Primary_Key" in df.columns:
@@ -40,24 +36,20 @@ if uploaded_file and user_id:
     record["phone_number"] = get_value("Phone")
     record["date_of_birth"] = get_value("DateOfBirth")
     record["gender"] = get_value("Gender")
-    
-    # Assemble address
+
     addr_parts = [get_value(f"Addr{i}") for i in range(5)]
-    if addr_parts[0] != "":
+    if addr_parts[0] and addr_parts[0] != "(not found)":
         record["address"] = f"{addr_parts[0]} {addr_parts[1]}, {addr_parts[2]}, {addr_parts[3]} {addr_parts[4]}"
     else:
         record["address"] = f"{addr_parts[1]}, {addr_parts[2]}, {addr_parts[3]} {addr_parts[4]}"
 
-    # Assemble IP address
     ip_parts = [get_value(f"IP{i}") for i in range(4)]
     record["ip_address"] = ".".join(ip_parts)
 
-    # Assemble device_id
     device_type = get_value("Device0")
     device_token = get_value("Device1")
     record["device_id"] = f"{device_type}_{device_token}"
 
-    # Assemble location
     lat_int = get_value("LAT0")
     lat_frac = get_value("LAT1")
     lon_int = get_value("LON0")
@@ -71,14 +63,12 @@ if uploaded_file and user_id:
         record["location_lat"] = "(not found)"
         record["location_lon"] = "(not found)"
 
-    # Health status
     record["health_status"] = get_value("HealthStatus")
 
     df_user = pd.DataFrame([record])
     st.success("User found:")
     st.dataframe(df_user)
 
-    # Enable download of reconstructed row
     output = BytesIO()
     df_user.to_excel(output, index=False, engine='openpyxl')
     st.download_button(
