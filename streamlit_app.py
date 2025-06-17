@@ -23,7 +23,7 @@ if uploaded_file and user_id:
     record = {"user_id": user_id}
     for table, df in sheets.items():
         h = hash_id(user_id, table)
-        match = df[df["hash_id"] == h]
+        match = df[df['Primary_Key'] == h]
         if not match.empty:
             value = match.iloc[0, 1]  # second column is the value
             record[table.lower()] = value
